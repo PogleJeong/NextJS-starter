@@ -214,3 +214,67 @@ const nextConfig = {
 
 module.exports = nextConfig
 ```
+
+
+## Server Side Rendering
+
+[공식문서](htps://nextjs.org/docs/basic-features/data-fetching/get-server-side-props)
+
+1. **getServerSideProps(-레거시됨-)**
+
+page에서 서버 측 랜더링 함수인 getServerSideProps함수를 export하는 경우 Next.js는 getServerSideProps에서 반환된 데이터를 사용하여 각 request에서 이 페이지를 pre-render합니다. getServerSideProps는 서버 측에서만 실행되며 브라우저에서는 실행되지 않습니다.
+
+getServerSideProps를 사용하여 request시 데이터 fetch하기
+다음 예는 request 시 데이터를 fetch하고 결과를 pre-render하는 방법을 보여줍니다.
+
+
+2. **fetch option(no-store)**
+[공식문서](https://nextjs.org/docs/app/building-your-application/data-fetching/fetching-caching-and-revalidating)
+
+```js
+async function fetchData() {
+const res = await fetch('http://localhost:3000/api/movies', {
+cache: 'no-store',
+})
+const { results } = await res.json()
+return results
+}
+```
+
+## Dynamic Routes
+
+NextJS 에서는 Route 에 대한 설정을 할 수 없으므로 page 폴더안에서 작업.
+
+- 만약 /movies/{movie-id} 경로로 가려고하면 
+movies 라는 폴더안에 [movie-id].js 를 작성
+
+- /movies 경로로 가고 싶으면 
+movies 라는 폴더안에 index.js 를 작성
+
+### Catch-all URL 
+ 
+**만약 복수의 url 변수**를 사용하고 싶다면 [...params].js 등으로 작성하면 된다
+
+URL 에 있는 모든 정보를 캐치할 수 있음.
+onClick 등 이벤트로 페이지를 이동하지 않더라도 url 검색으로 페이지 이동이 가능
+
+[..params].js 등으로 작성한 페이지에서 useRoute.query 에서 url 변수확인가능
+
+### getStaticProps
+
+SSR 을 활용하기 위한 함수 (Next 13)
+CSR 의 경우 JS 파일을 모두 다운받지 않으면 useRouter 를 통해 정보를 가져올 수 없기 때문에 로딩시간동안 빈화면을 보여줄 수 있음.
+
+```js
+export async function getStaticProps({ params }:Params) { // params 는 dynamic route prop 을 져옮
+    return {
+    props: { params },
+};
+}
+export async function getStaticPaths() {
+return {
+    paths: [], // 동적 경로가 없으므로 빈 배열로 설정
+    fallback: 'blocking', // 다른 경로로의 접근은 서버 사이드에서 대기
+};
+}
+```
